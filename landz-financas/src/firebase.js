@@ -3,13 +3,12 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC0qhOhbQG4oz79eBcNUKu981zUkvHB9a0",
-  authDomain: "landzfinancas.firebaseapp.com",
-  projectId: "landzfinancas",
-  storageBucket: "landzfinancas.firebasestorage.app",
-  messagingSenderId: "491789624246",
-  appId: "1:491789624246:web:6c92a872593a555660d717",
-  measurementId: "G-RB10PN3LJH"
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_APP_ID,
 };
 
 const app  = initializeApp(firebaseConfig);
