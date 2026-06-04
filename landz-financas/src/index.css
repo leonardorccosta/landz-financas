@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream:    #FAF8F4;
+  --cream2:   #F2EFE9;
+  --cream3:   #E8E3DA;
+  --ink:      #1A1714;
+  --ink2:     #4A453E;
+  --ink3:     #8C8278;
+  --green:    #2A6B4A;
+  --green-bg: #EBF5EE;
+  --red:      #B83232;
+  --red-bg:   #FCEAEA;
+  --amber:    #9A6200;
+  --amber-bg: #FEF5E4;
+  --accent:   #2A6B4A;
+  --leo:      #1A6BC7;
+  --leo-bg:   #E8F1FC;
+  --zu:       #C22870;
+  --zu-bg:    #FCEAF4;
+  --radius:   12px;
+  --shadow:   0 2px 12px rgba(26,23,20,.07);
+  --shadow-lg:0 8px 32px rgba(26,23,20,.12);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100dvh;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+h1, h2, h3 {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+button {
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+input, select, textarea {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--cream2); }
+::-webkit-scrollbar-thumb { background: var(--cream3); border-radius: 3px; }
