@@ -8,9 +8,10 @@ import Login from './components/Login';
 import ContaCard from './components/ContaCard';
 import ContaModal from './components/ContaModal';
 import Resumo from './components/Resumo';
-import { Plus, LogOut, SlidersHorizontal, LayoutList, Settings } from 'lucide-react';
+import { Plus, LogOut, SlidersHorizontal, LayoutList, Settings, CalendarDays } from 'lucide-react';
 import LancamentoMensal from './components/LancamentoMensal';
 import Configuracoes from './components/Configuracoes';
+import VisaoMensal from './components/VisaoMensal';
 import './index.css';
 
 const STATUS_ORDER = { vencido: 0, aberto: 1, pago: 2 };
@@ -21,7 +22,9 @@ export default function App() {
   const [modal, setModal] = useState(null);     // null | 'new' | conta object
   const [filtro, setFiltro] = useState('todos'); // todos | aberto | pago | vencido
   const [loading, setLoading] = useState(true);
-  const [screen, setScreen] = useState('home');
+  const [screen, setScreen] = useState('visaoMensal');
+  const [lancamentoMes, setLancamentoMes] = useState(null);
+  const [lancamentoAno, setLancamentoAno] = useState(null);
 
   // Auth listener
   useEffect(() => {
@@ -72,12 +75,35 @@ export default function App() {
 
   if (!user) return <Login />;
 
+  if (screen === 'visaoMensal') {
+    return (
+      <VisaoMensal
+        user={user}
+        onLancar={(mes, ano) => {
+          setLancamentoMes(mes);
+          setLancamentoAno(ano);
+          setScreen('lancamento');
+        }}
+        onContas={() => setScreen('home')}
+        onConfiguracoes={() => setScreen('configuracoes')}
+        onSignOut={() => signOut(auth)}
+      />
+    );
+  }
+
   if (screen === 'lancamento') {
-    return <LancamentoMensal user={user} onVoltar={() => setScreen('home')}/>;
+    return (
+      <LancamentoMensal
+        user={user}
+        initialMes={lancamentoMes}
+        initialAno={lancamentoAno}
+        onVoltar={() => setScreen('visaoMensal')}
+      />
+    );
   }
 
   if (screen === 'configuracoes') {
-    return <Configuracoes user={user} onVoltar={() => setScreen('home')}/>;
+    return <Configuracoes user={user} onVoltar={() => setScreen('visaoMensal')}/>;
   }
 
   const contasFiltradas = contas
@@ -98,7 +124,10 @@ export default function App() {
             <p style={styles.mes}>{mesAtual}</p>
           </div>
           <div style={styles.headerActions}>
-            <button style={styles.lanceBtn} onClick={() => setScreen('lancamento')}>
+            <button style={styles.lanceBtn} onClick={() => setScreen('visaoMensal')}>
+              <CalendarDays size={15}/> Meses
+            </button>
+            <button style={styles.lanceBtn} onClick={() => { setLancamentoMes(null); setLancamentoAno(null); setScreen('lancamento'); }}>
               <LayoutList size={15}/> Lançamento
             </button>
             <button style={styles.addBtn} onClick={() => setModal('new')}>

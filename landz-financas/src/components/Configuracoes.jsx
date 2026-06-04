@@ -2,14 +2,7 @@ import { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { ChevronLeft, Save, Info } from 'lucide-react';
-
-const CATEGORIAS = [
-  'Aluguel', 'Condomínio', 'Porto Seguro', 'Internet', 'Energia',
-  'Cartão C6 - Léo', 'Cartão C6 - Pais Léo', 'Cartão Itau - Léo',
-  'Cartão Nubank - Léo', 'Cartão BB - Zu', 'C6 Zu', 'Cartão Itaú - Zu',
-  'Celular - Zu', 'Inglês Zu', 'Inglês Leo', 'Elase', 'Tenis Leo',
-  'Unisul', 'Creche She',
-];
+import { CATEGORIAS } from '../constants/categorias';
 
 const styleEl = document.createElement('style');
 styleEl.textContent = `
@@ -127,24 +120,26 @@ export default function Configuracoes({ user, onVoltar }) {
             </thead>
             <tbody>
               {CATEGORIAS.map(cat => {
-                const resp = get(config, cat, 'responsavel');
+                const resp = get(config, cat.id, 'responsavel');
                 return (
-                  <tr key={cat} className="cfg-row" style={S.tr}>
-                    <td style={{ ...S.td, ...S.catCell }}>{cat}</td>
+                  <tr key={cat.id} className="cfg-row" style={S.tr}>
+                    <td style={{ ...S.td, ...S.catCell }}>
+                      <span style={{ marginRight: 8 }}>{cat.icon}</span>{cat.label}
+                    </td>
                     <td style={S.td}>
                       <input
                         className="cfg-cell" style={S.cell}
                         type="text" inputMode="decimal"
                         placeholder="Livre"
-                        value={get(config, cat, 'valor')}
-                        onChange={e => upd(cat, 'valor', e.target.value)}
+                        value={get(config, cat.id, 'valor')}
+                        onChange={e => upd(cat.id, 'valor', e.target.value)}
                       />
                     </td>
                     <td style={S.td}>
                       <select
                         className="cfg-cell" style={S.cell}
                         value={resp}
-                        onChange={e => upd(cat, 'responsavel', e.target.value)}
+                        onChange={e => upd(cat.id, 'responsavel', e.target.value)}
                       >
                         <option>Leonardo</option>
                         <option>Zuila</option>
@@ -157,8 +152,8 @@ export default function Configuracoes({ user, onVoltar }) {
                             className="cfg-cell"
                             style={{ ...S.cell, textAlign: 'center' }}
                             type="number" min="0" max="100"
-                            value={get(config, cat, 'divisao')}
-                            onChange={e => upd(cat, 'divisao', e.target.value)}
+                            value={get(config, cat.id, 'divisao')}
+                            onChange={e => upd(cat.id, 'divisao', e.target.value)}
                           />
                         : <span style={S.dash}>—</span>
                       }

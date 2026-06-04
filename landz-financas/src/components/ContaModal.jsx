@@ -1,27 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-
-const CATEGORIAS = [
-  'Aluguel',
-  'Condomínio',
-  'Porto Seguro',
-  'Internet',
-  'Energia',
-  'Cartão C6 - Léo',
-  'Cartão C6 - Pais Léo',
-  'Cartão Itau - Léo',
-  'Cartão Nubank - Léo',
-  'Cartão BB - Zu',
-  'C6 Zu',
-  'Cartão Itaú - Zu',
-  'Celular - Zu',
-  'Inglês Zu',
-  'Inglês Leo',
-  'Elase',
-  'Tenis Leo',
-  'Unisul',
-  'Creche She',
-];
+import { CATEGORIAS } from '../constants/categorias';
 
 const RESPONSAVEIS = ['Leonardo', 'Zuila', 'Casal'];
 
@@ -30,7 +9,7 @@ export default function ContaModal({ conta, onSave, onClose }) {
     nome: '',
     valor: '',
     vencimento: '',
-    categoria: 'Aluguel',
+    categoria: CATEGORIAS[0].id,
     responsavel: 'Casal',
     minhaPorc: 50,
     status: 'aberto',
@@ -87,7 +66,7 @@ export default function ContaModal({ conta, onSave, onClose }) {
             <div style={{...styles.field, flex: 1}}>
               <label style={styles.label}>Categoria</label>
               <select style={styles.input} value={form.categoria} onChange={e => set('categoria', e.target.value)}>
-                {CATEGORIAS.map(c => <option key={c}>{c}</option>)}
+                {CATEGORIAS.map(c => <option key={c.id} value={c.id}>{c.icon} {c.label}</option>)}
               </select>
             </div>
             <div style={{...styles.field, flex: 1}}>

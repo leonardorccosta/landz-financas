@@ -2,14 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Trash2, Plus, ChevronLeft, Save } from 'lucide-react';
-
-const CATEGORIAS = [
-  'Aluguel', 'Condomínio', 'Porto Seguro', 'Internet', 'Energia',
-  'Cartão C6 - Léo', 'Cartão C6 - Pais Léo', 'Cartão Itau - Léo',
-  'Cartão Nubank - Léo', 'Cartão BB - Zu', 'C6 Zu', 'Cartão Itaú - Zu',
-  'Celular - Zu', 'Inglês Zu', 'Inglês Leo', 'Elase', 'Tenis Leo',
-  'Unisul', 'Creche She',
-];
+import { CATEGORIAS, catLabel } from '../constants/categorias';
 
 const MESES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -29,9 +22,8 @@ styleEl.textContent = `
 document.head.appendChild(styleEl);
 
 let _uid = 1;
-const novaLinha = (nome = '', categoria = 'Aluguel', preset = {}) => ({
+const novaLinha = (categoria = CATEGORIAS[0].id, preset = {}) => ({
   _id: _uid++,
-  nome,
   categoria,
   valor: preset.valor ?? '',
   vencimento: '',
@@ -41,10 +33,10 @@ const novaLinha = (nome = '', categoria = 'Aluguel', preset = {}) => ({
 });
 
 
-export default function LancamentoMensal({ user, onVoltar }) {
+export default function LancamentoMensal({ user, onVoltar, initialMes, initialAno }) {
   const now = new Date();
-  const [mes, setMes] = useState(now.getMonth() + 1);
-  const [ano, setAno] = useState(now.getFullYear());
+  const [mes, setMes] = useState(initialMes ?? now.getMonth() + 1);
+  const [ano, setAno] = useState(initialAno ?? now.getFullYear());
   const [linhas, setLinhas] = useState([]);
   const [configLoaded, setConfigLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -55,9 +47,9 @@ export default function LancamentoMensal({ user, onVoltar }) {
       try {
         const snap = await getDoc(doc(db, 'users', user.uid, 'configuracoes', 'categorias'));
         const cfg = snap.exists() ? snap.data() : {};
-        if (!cancelled) setLinhas(CATEGORIAS.map(c => novaLinha(c, c, cfg[c] || {})));
+        if (!cancelled) setLinhas(CATEGORIAS.map(c => novaLinha(c.id, cfg[c.id] || {})));
       } catch {
-        if (!cancelled) setLinhas(CATEGORIAS.map(c => novaLinha(c, c)));
+        if (!cancelled) setLinhas(CATEGORIAS.map(c => novaLinha(c.id)));
       } finally {
         if (!cancelled) setConfigLoaded(true);
       }
@@ -85,17 +77,16 @@ export default function LancamentoMensal({ user, onVoltar }) {
   }, { total: 0, eu: 0, conj: 0 });
 
   async function salvar() {
-    const pv = v => parseFloat(String(v || '').replace(',', '.')) || 0;
-    const validas = linhas.filter(l => l.nome.trim() && pv(l.valor) > 0);
+    const validas = linhas.filter(l => pv(l.valor) > 0);
     if (!validas.length) {
-      alert('Adicione pelo menos uma conta com nome e valor.');
+      alert('Adicione pelo menos uma conta com valor.');
       return;
     }
     setSaving(true);
     try {
       const col = collection(db, 'users', user.uid, 'contas');
       await Promise.all(validas.map(l => addDoc(col, {
-        nome: l.nome.trim(),
+        nome: catLabel(l.categoria),
         categoria: l.categoria,
         valor: pv(l.valor),
         vencimento: parseInt(l.vencimento) || 1,
@@ -120,7 +111,8 @@ export default function LancamentoMensal({ user, onVoltar }) {
 
   const fmt = v => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   const anos = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1];
-  const nContas = linhas.filter(l => l.nome.trim()).length;
+  const pv = v => parseFloat(String(v || '').replace(',', '.')) || 0;
+  const nContas = linhas.filter(l => pv(l.valor) > 0).length;
 
   if (!configLoaded) {
     return (
@@ -174,8 +166,7 @@ export default function LancamentoMensal({ user, onVoltar }) {
         <div style={S.tableWrap}>
           <table style={S.table}>
             <colgroup>
-              <col style={{ minWidth: 160 }}/>
-              <col style={{ minWidth: 148 }}/>
+              <col style={{ minWidth: 180 }}/>
               <col style={{ minWidth: 100 }}/>
               <col style={{ minWidth: 68 }}/>
               <col style={{ minWidth: 110 }}/>
@@ -185,7 +176,6 @@ export default function LancamentoMensal({ user, onVoltar }) {
             </colgroup>
             <thead>
               <tr>
-                <th style={S.th}>Nome da conta</th>
                 <th style={S.th}>Categoria</th>
                 <th style={S.th}>Valor R$</th>
                 <th style={S.th}>Venc.</th>
@@ -199,20 +189,12 @@ export default function LancamentoMensal({ user, onVoltar }) {
               {linhas.map(l => (
                 <tr key={l._id} className="lm-row" style={S.tr}>
                   <td style={S.td}>
-                    <input
-                      className="lm-cell" style={S.cell}
-                      placeholder="Ex: Aluguel"
-                      value={l.nome}
-                      onChange={e => upd(l._id, 'nome', e.target.value)}
-                    />
-                  </td>
-                  <td style={S.td}>
                     <select
                       className="lm-cell" style={S.cell}
                       value={l.categoria}
                       onChange={e => upd(l._id, 'categoria', e.target.value)}
                     >
-                      {CATEGORIAS.map(c => <option key={c}>{c}</option>)}
+                      {CATEGORIAS.map(c => <option key={c.id} value={c.id}>{c.icon} {c.label}</option>)}
                     </select>
                   </td>
                   <td style={S.td}>
@@ -279,12 +261,12 @@ export default function LancamentoMensal({ user, onVoltar }) {
             </tbody>
             <tfoot>
               <tr style={S.tfRow}>
-                <td colSpan={2} style={S.tfLabel}>
+                <td style={S.tfLabel}>
                   Totais — {nContas} conta{nContas !== 1 ? 's' : ''}
                 </td>
                 <td style={S.tfTotal}>{fmt(totals.total)}</td>
                 <td/>
-                <td colSpan={4} style={S.tfSub}>
+                <td colSpan={3} style={S.tfSub}>
                   <span style={{ color: 'var(--leo)', fontWeight: 700 }}>
                     🔵 Leonardo: {fmt(totals.eu)}
                   </span>
@@ -331,7 +313,7 @@ const S = {
   mesSelect: { padding: '8px 14px', borderRadius: 8, border: '1.5px solid var(--cream3)', background: '#fff', fontSize: 14, color: 'var(--ink)', cursor: 'pointer', outline: 'none', fontFamily: 'DM Sans, sans-serif' },
 
   tableWrap: { overflowX: 'auto', borderRadius: 14, border: '1px solid var(--cream3)', background: '#fff', boxShadow: 'var(--shadow-lg)', marginBottom: 12 },
-  table:     { width: '100%', borderCollapse: 'collapse', minWidth: 760 },
+  table:     { width: '100%', borderCollapse: 'collapse', minWidth: 600 },
   th:        { padding: '12px 10px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--ink3)', textTransform: 'uppercase', letterSpacing: '.06em', background: 'var(--cream)', borderBottom: '1.5px solid var(--cream3)', whiteSpace: 'nowrap' },
   tr:        { borderBottom: '1px solid var(--cream3)' },
   td:        { padding: '3px 3px' },

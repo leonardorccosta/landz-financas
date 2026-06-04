@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /c/Users/Leo/Documents/LandFinancas/landz-financas && ls -la && pwd)",
+      "Read(//c/c/Users/Leo/Documents/LandFinancas/**)"
+    ]
+  }
+}
